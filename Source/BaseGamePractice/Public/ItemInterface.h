@@ -23,8 +23,22 @@ class BASEGAMEPRACTICE_API IItemInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-    virtual void OnItemOverlap(AActor* OverlapActor) = 0;
-    virtual void OnItemEndOverlap(AActor* OverlapActor) = 0;
+	UFUNCTION()
+	virtual void OnItemOverlap(
+		UPrimitiveComponent* OverlappedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult) = 0;
+
+	UFUNCTION()
+	virtual void OnItemEndOverlap(
+		UPrimitiveComponent* OverlappedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex) = 0;
+
     virtual void ActivateItem(AActor* Activator) = 0;
     virtual FName GetItemType() const = 0;
 };

@@ -4,6 +4,7 @@
 #include "MyGameState.h"
 #include "MyGameInstance.h"
 #include "MyPlayerController.h"
+#include "MyCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
 #include "Blueprint/UserWidget.h"
@@ -63,9 +64,6 @@ void AMyGameState::StartNextWave()
         GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Wave %d 시작!"), CurrentWaveIndex));
     }
 
-    // 현재 웨이브에 맞는 아이템 스폰
-    //SpawnItemsForWave(CurrentWave);
-
     // 웨이브 시간
     WaveDuration = 5.0f;
 
@@ -83,17 +81,6 @@ void AMyGameState::StartPreparationPhase()
     if (GEngine)
     {
         GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Wave %d 준비 중... %d초 후 시작!"), CurrentWaveIndex + 1, FMath::RoundToInt(WaveDuration)));
-    }
-
-    //준비시간에서 Wave Count 올린다.
-    if (UGameInstance* GameInstance = GetGameInstance())
-    {
-        UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
-        if (MyGameInstance)
-        {
-            CurrentWaveIndex++;
-            MyGameInstance->CurrentWave = CurrentWaveIndex;
-        }
     }
 
     // 대기시간으로 변경
@@ -134,14 +121,50 @@ void AMyGameState::AddScore(int32 Amount)
 
 void AMyGameState::OnGameOver()
 {
-}
-
-void AMyGameState::OnLevelTimeUp()
-{
+    if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+    {
+        if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
+        {
+            MyPlayerController->SetPause(true);
+            //MyPlayerController->ShowMainMenu(true);
+        }
+    }
 }
 
 void AMyGameState::OnCoinCollected()
 {
+    CollectedCoinCount++;
+
+    if (SpawnedCoinCount > 0 && CollectedCoinCount >= SpawnedCoinCount)
+    {
+        EndWave();
+    }
+}
+
+void AMyGameState::EndWave()
+{
+    GetWorldTimerManager().ClearTimer(WaveTimerHandle);
+
+    if (UGameInstance* GameInstance = GetGameInstance())
+    {
+        UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
+        if (MyGameInstance)
+        {
+            AddScore(Score);
+            CurrentWaveIndex++;
+            MyGameInstance->CurrentWave = CurrentWaveIndex;
+
+            if (CurrentWaveIndex >= MaxWaves)
+            {
+                OnGameOver();
+                return;
+            }
+            else
+            {
+                StartPreparationPhase();
+            }
+        }
+    }
 }
 
 void AMyGameState::UpdateHUD()
@@ -170,9 +193,19 @@ void AMyGameState::UpdateHUD()
                     }
                 }
 
-                if (UTextBlock* LevelIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("WaveText"))))
+                if (UTextBlock* WaveIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("WaveText"))))
                 {
-                    LevelIndexText->SetText(FText::FromString(FString::Printf(TEXT("Wave : %d"), CurrentWaveIndex)));
+                    WaveIndexText->SetText(FText::FromString(FString::Printf(TEXT("Wave : %d"), CurrentWaveIndex)));
+                }
+
+                if (UTextBlock* HPText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("HPText"))))
+                {
+                    // AMyCharacter를 직접 가져옴
+                    if (AMyCharacter* MyCharacter = Cast<AMyCharacter>(PlayerController->GetCharacter()))
+                    {
+                        int32 Health = MyCharacter->GetHealth(); // 캐릭터의 현재 체력
+                        HPText->SetText(FText::FromString(FString::Printf(TEXT("Health : %d / 100"), Health)));
+                    }
                 }
             }
         }

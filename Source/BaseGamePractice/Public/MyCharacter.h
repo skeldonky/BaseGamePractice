@@ -29,6 +29,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
 
+	
+	UFUNCTION(BlueprintPure, Category = "Health")
+	int32 GetHealth() const;
+	
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void AddHealth(float Amount);
+
+	// 버프 함수
+	UFUNCTION()
+	void ApplyBuff(FName BuffType, float Duration);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -57,6 +68,22 @@ protected:
 
 	UFUNCTION()
 	void StopSprint(const FInputActionValue& value);
+
+	FTimerHandle BuffTimerHandle;
+
+	void ResetSpeed();
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float MaxHealth;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
+	float Health;
+	
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	virtual void OnDeath();
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 private:
 	float NormalSpeed; // 기본 걷기 속도

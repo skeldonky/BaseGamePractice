@@ -37,7 +37,6 @@ public:
 	void StartNextWave();               // 다음 웨이브 시작
 	void StartPreparationPhase(); // 준비 단계 시작
 	void EndPreparationPhase();   // 준비 단계 종료 및 웨이브 시작
-	//void SpawnItemsForWave(int32 Wave); // 현재 웨이브에 맞는 아이템 스폰
 
 	UFUNCTION(BlueprintCallable, Category = "Wave")
 	int32 GetMaxWaves() const;
@@ -50,10 +49,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void OnGameOver();
 
-	// 레벨 제한 시간이 만료되었을 때 호출
-	void OnLevelTimeUp();
-	// 코인을 주웠을 때 호출
 	void OnCoinCollected();
-	// UI HUD
+	void EndWave();
 	void UpdateHUD();
 };

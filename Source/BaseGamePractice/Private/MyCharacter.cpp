@@ -15,23 +15,22 @@ AMyCharacter::AMyCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// 스프링 암
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArmComp->SetupAttachment(RootComponent);
 	SpringArmComp->TargetArmLength = 300.0f;
 	SpringArmComp->bUsePawnControlRotation = true;
 
-	// 카메라
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->bUsePawnControlRotation = false;
 
-	//이동속도들 기본값
 	NormalSpeed = 600.0f;
 	SprintSpeedMultiplier = 1.5f;
 	SprintSpeed = NormalSpeed * SprintSpeedMultiplier;
-	//이동속도 설정
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+
+	MaxHealth = 100.0f;
+	Health = MaxHealth;
 }
 
 // Called when the game starts or when spawned
@@ -151,6 +150,56 @@ void AMyCharacter::StopSprint(const FInputActionValue& value)
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+	}
+}
+
+void AMyCharacter::ResetSpeed()
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+	}
+}
+
+void AMyCharacter::OnDeath()
+{
+}
+
+float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
+
+	if (Health <= 0.0f)
+	{
+		OnDeath();
+	}
+
+	// 실제 적용된 데미지를 반환
+	return ActualDamage;
+}
+
+int32 AMyCharacter::GetHealth() const
+{
+	return Health;
+}
+
+void AMyCharacter::AddHealth(float Amount)
+{
+	Health = FMath::Clamp(Health + Amount, 0.0f, MaxHealth);
+}
+
+void AMyCharacter::ApplyBuff(FName BuffType, float Duration)
+{
+	// BuffType에 따라 다른 효과를 처리
+	if (BuffType == "SpeedBoost")
+	{
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+			GetWorld()->GetTimerManager().SetTimer(BuffTimerHandle, this, &AMyCharacter::ResetSpeed, Duration, false);
+		}
 	}
 }
 

@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ItemInterface.h"
-#include "BaseItem.generated.h"
+#include "BaseItem.generated.h"	// 얘가 무조건 마지막에 있어야됨
+
+class USphereComponent;
 
 UCLASS()
 class BASEGAMEPRACTICE_API ABaseItem : public AActor, public IItemInterface
@@ -16,16 +18,39 @@ public:
 	// Sets default values for this actor's properties
 	ABaseItem();
 
-protected:
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FName ItemType;
 
-	virtual void OnItemOverlap(AActor* OverlapActor) override;
-	virtual void OnItemEndOverlap(AActor* OverlapActor) override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item|Component")
+	USceneComponent* Scene;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item|Component")
+	USphereComponent* Collision;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item|Component")
+	UStaticMeshComponent* StaticMesh;
+
+	virtual void OnItemOverlap(
+		UPrimitiveComponent* OverlappedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult) override;
+
+	virtual void OnItemEndOverlap(
+		UPrimitiveComponent* OverlappedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex) override;
+
 	virtual void ActivateItem(AActor* Activator) override;
 	virtual FName GetItemType() const override;
-
 	virtual void DestroyItem();
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 };
