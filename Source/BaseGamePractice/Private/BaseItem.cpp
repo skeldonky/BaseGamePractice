@@ -44,7 +44,6 @@ void ABaseItem::OnItemEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* Ot
 
 void ABaseItem::ActivateItem(AActor* Activator)
 {
-    UE_LOG(LogTemp, Log, TEXT("Active!!!"));
 }
 
 FName ABaseItem::GetItemType() const
@@ -54,6 +53,7 @@ FName ABaseItem::GetItemType() const
 
 void ABaseItem::DestroyItem()
 {
+    Spawner->DestroyGetItem(this);
 	Destroy();
 }
 

@@ -70,7 +70,7 @@ void AMyGameState::StartNextWave()
     // 다음 웨이브 준비 단계를 위한 타이머 설정
     if (CurrentWaveIndex < MaxWaves)
     {
-        GetWorldTimerManager().SetTimer(WaveTimerHandle, this, &AMyGameState::StartPreparationPhase, WaveDuration, false);
+        GetWorldTimerManager().SetTimer(WaveTimerHandle, this, &AMyGameState::EndWave, WaveDuration, false);
     }
 
     UpdateHUD();
@@ -85,6 +85,14 @@ void AMyGameState::StartPreparationPhase()
 
     // 대기시간으로 변경
     WaveDuration = 10.0f;
+
+    for (int32 i = 0; i < 10; ++i)
+    {
+        if (ItemSpawner)
+        {
+            ItemSpawner->SpawnRandomItem();
+        }
+    }
 
     // 준비 시간이 끝나면 웨이브 시작
     GetWorldTimerManager().SetTimer(WaveTimerHandle, this, &AMyGameState::EndPreparationPhase, WaveDuration, false);
@@ -154,6 +162,8 @@ void AMyGameState::EndWave()
             CurrentWaveIndex++;
             MyGameInstance->CurrentWave = CurrentWaveIndex;
 
+            ItemSpawner->DestroyAllSpawnedItems();
+
             if (CurrentWaveIndex >= MaxWaves)
             {
                 OnGameOver();
@@ -195,7 +205,7 @@ void AMyGameState::UpdateHUD()
 
                 if (UTextBlock* WaveIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("WaveText"))))
                 {
-                    WaveIndexText->SetText(FText::FromString(FString::Printf(TEXT("Wave : %d"), CurrentWaveIndex)));
+                    WaveIndexText->SetText(FText::FromString(FString::Printf(TEXT("Wave : %d"), CurrentWaveIndex + 1)));
                 }
 
                 if (UTextBlock* HPText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("HPText"))))

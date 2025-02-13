@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
+#include "ItemSpawner.h"
 #include "MyGameState.generated.h"
 
 /**
@@ -33,6 +34,8 @@ public:
 
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	AItemSpawner* ItemSpawner;
 
 	void StartNextWave();               // 다음 웨이브 시작
 	void StartPreparationPhase(); // 준비 단계 시작

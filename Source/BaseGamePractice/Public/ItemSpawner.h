@@ -21,6 +21,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Spawning")
     void SpawnRandomItem();
 
+    void DestroyGetItem(AActor* GetItem);
+    void DestroyAllSpawnedItems();
+
 protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawning")
@@ -31,6 +34,9 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning")
     TArray<UDataTable*> ItemDataTable;
+
+    UPROPERTY()
+    TArray<AActor*> SpawnedItems;
 
     FVector GetRandomPointInVolume() const;
     FItemSpawnRow* GetRandomItem() const;

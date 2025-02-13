@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ItemInterface.h"
+#include "ItemSpawner.h"
 #include "BaseItem.generated.h"	// 얘가 무조건 마지막에 있어야됨
 
 class USphereComponent;
@@ -29,6 +30,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item|Component")
 	UStaticMeshComponent* StaticMesh;
+
+	UPROPERTY()
+	AItemSpawner* Spawner;
+
 
 	virtual void OnItemOverlap(
 		UPrimitiveComponent* OverlappedComp,

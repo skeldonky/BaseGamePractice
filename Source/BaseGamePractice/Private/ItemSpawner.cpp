@@ -110,11 +110,49 @@ void AItemSpawner::SpawnItem(TSubclassOf<AActor> ItemClass)
 {
     if (!ItemClass) return;
 
-    GetWorld()->SpawnActor<AActor>(
+    AActor* SpawnedItem = GetWorld()->SpawnActor<AActor>(
         ItemClass,
         GetRandomPointInVolume(),
         FRotator::ZeroRotator
     );
+
+    if (SpawnedItem)
+    {
+        SpawnedItems.Add(SpawnedItem);
+    }
+}
+
+void AItemSpawner::DestroyGetItem(AActor* GetItem)
+{
+    if (SpawnedItems.Remove(GetItem) > 0)
+    {
+        return;
+    }
+    else
+    {
+        return;
+    }
+}
+
+void AItemSpawner::DestroyAllSpawnedItems()
+{
+    for (int32 i = SpawnedItems.Num() - 1; i >= 0; --i) // 역순으로 순회
+    {
+        AActor* Item = SpawnedItems[i];
+
+        // 유효성 검사
+        if (Item && IsValid(Item))
+        {
+            Item->Destroy(); // 아이템 삭제
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Invalid or already destroyed item at index %d"), i);
+        }
+    }
+
+    // 배열 비우기
+    SpawnedItems.Empty();
 }
 
 
